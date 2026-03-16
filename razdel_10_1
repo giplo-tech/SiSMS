@@ -1,0 +1,65 @@
+%% Построение треугольника компромисса
+clear all; clc;
+
+% Нормированные значения характеристик (0-1)
+% Для помехоустойчивости: чем меньше требуемый SNR, тем лучше
+SNR_16 = 11.2; SNR_64 = 16.1;
+SNR_max = 20; % максимальное SNR в шкале
+robustness_16 = 1 - SNR_16/SNR_max; % помехоустойчивость (нормированная)
+robustness_64 = 1 - SNR_64/SNR_max;
+
+% Спектральная эффективность (нормированная)
+Sef_16 = 2; Sef_64 = 3;
+Sef_max = 4; % максимальная Sef для QAM
+sef_norm_16 = Sef_16 / Sef_max;
+sef_norm_64 = Sef_64 / Sef_max;
+
+% Сложность (нормированная, чем меньше, тем лучше)
+comp_16 = 5; comp_64 = 7;
+comp_max = 10;
+complexity_norm_16 = 1 - comp_16/comp_max;
+complexity_norm_64 = 1 - comp_64/comp_max;
+
+% Координаты для треугольника (трехмерные, приводим к 2D для отображения)
+% Используем barycentric coordinates для отображения на треугольнике
+% Вершины треугольника: 
+% A(0,0) - помехоустойчивость, B(1,0) - спектр. эффективность, C(0.5,0.866) - сложность
+
+figure;
+hold on;
+grid on;
+
+% Рисуем треугольник
+x_tri = [0, 1, 0.5, 0];
+y_tri = [0, 0, 0.866, 0];
+plot(x_tri, y_tri, 'k-', 'LineWidth', 2);
+
+% Подписи вершин
+text(-0.05, -0.03, 'Помехо-\nустойчивость', 'HorizontalAlignment', 'right');
+text(1.05, -0.03, 'Спектральная\nэффективность', 'HorizontalAlignment', 'left');
+text(0.5, 0.93, 'Вычислительная\nсложность', 'HorizontalAlignment', 'center');
+
+% Преобразование координат для точек режимов
+% Для 16-QAM
+x16 = robustness_16 * 0 + sef_norm_16 * 1 + complexity_norm_16 * 0.5;
+y16 = robustness_16 * 0 + sef_norm_16 * 0 + complexity_norm_16 * 0.866;
+% Нормируем, чтобы сумма была 1
+sum16 = robustness_16 + sef_norm_16 + complexity_norm_16;
+x16 = x16 / sum16;
+y16 = y16 / sum16;
+
+% Для 64-QAM
+x64 = robustness_64 * 0 + sef_norm_64 * 1 + complexity_norm_64 * 0.5;
+y64 = robustness_64 * 0 + sef_norm_64 * 0 + complexity_norm_64 * 0.866;
+sum64 = robustness_64 + sef_norm_64 + complexity_norm_64;
+x64 = x64 / sum64;
+y64 = y64 / sum64;
+
+% Отмечаем точки режимов
+plot(x16, y16, 'bo', 'MarkerSize', 12, 'MarkerFaceColor', 'b');
+plot(x64, y64, 'rs', 'MarkerSize', 12, 'MarkerFaceColor', 'r');
+
+legend('Треугольник компромисса', '16-QAM, r=1/2', '64-QAM, r=1/2', 'Location', 'best');
+title('Треугольник компромисса для режимов передачи');
+axis equal;
+axis([-0.1 1.1 -0.1 1]);
