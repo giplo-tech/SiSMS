@@ -1,0 +1,14 @@
+%% Оценка влияния кодирования
+clear all; clc;
+
+% Исходные данные из раздела 4
+SNR_16_no_code = 15.2;  % SNR для BER=1e-4 без кода
+SNR_64_no_code = 20.1;  % SNR для BER=1e-4 без кода
+coding_gain = 4;         % выигрыш кодирования в дБ
+
+% SNR с учетом кодирования
+SNR_16_code = SNR_16_no_code - coding_gain;
+SNR_64_code = SNR_64_no_code - coding_gain;
+
+fprintf('16-QAM с кодированием: SNR = %.2f дБ для BER=1e-4\n', SNR_16_code);
+fprintf('64-QAM с кодированием: SNR = %.2f дБ для BER=1e-4\n', SNR_64_code);
