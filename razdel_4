@@ -1,0 +1,59 @@
+%% Моделирование BER для 16-QAM и 64-QAM в канале AWGN
+clear all; clc; close all;
+
+% Параметры моделирования
+M_16 = 16;          % 16-QAM
+M_64 = 64;          % 64-QAM
+k_16 = log2(M_16);  % 4 бита на символ
+k_64 = log2(M_64);  % 6 бит на символ
+
+numBits = 1e5;      % количество бит
+SNR_dB = 0:2:20;    % диапазон SNR
+
+% Массивы для результатов
+BER_16 = zeros(size(SNR_dB));
+BER_64 = zeros(size(SNR_dB));
+
+for idx = 1:length(SNR_dB)
+    snr = SNR_dB(idx);
+    
+    % 16-QAM
+    data_16 = randi([0 1], numBits, 1);
+    dataSymbols_16 = bi2de(reshape(data_16, k_16, numBits/k_16).', 'left-msb');
+    modulated_16 = qammod(dataSymbols_16, M_16, 'UnitAveragePower', true);
+    received_16 = awgn(modulated_16, snr, 'measured');
+    demodulatedSymbols_16 = qamdemod(received_16, M_16, 'UnitAveragePower', true);
+    demodulatedBits_16 = de2bi(demodulatedSymbols_16, k_16, 'left-msb');
+    demodulatedBits_16 = demodulatedBits_16(:);
+    errors_16 = sum(data_16 ~= demodulatedBits_16);
+    BER_16(idx) = errors_16 / numBits;
+    
+    % 64-QAM
+    data_64 = randi([0 1], numBits, 1);
+    dataSymbols_64 = bi2de(reshape(data_64, k_64, numBits/k_64).', 'left-msb');
+    modulated_64 = qammod(dataSymbols_64, M_64, 'UnitAveragePower', true);
+    received_64 = awgn(modulated_64, snr, 'measured');
+    demodulatedSymbols_64 = qamdemod(received_64, M_64, 'UnitAveragePower', true);
+    demodulatedBits_64 = de2bi(demodulatedSymbols_64, k_64, 'left-msb');
+    demodulatedBits_64 = demodulatedBits_64(:);
+    errors_64 = sum(data_64 ~= demodulatedBits_64);
+    BER_64(idx) = errors_64 / numBits;
+end
+
+% Построение графика
+figure;
+semilogy(SNR_dB, BER_16, 'b-o', 'LineWidth', 1.5); hold on;
+semilogy(SNR_dB, BER_64, 'r-s', 'LineWidth', 1.5);
+grid on;
+xlabel('SNR (дБ)');
+ylabel('BER');
+title('Зависимость BER от SNR для 16-QAM и 64-QAM');
+legend('16-QAM', '64-QAM', 'Location', 'southwest');
+
+% Определение SNR для целевых BER
+target_BER = [1e-3, 1e-4];
+SNR_16 = interp1(log10(BER_16), SNR_dB, log10(target_BER), 'pchip');
+SNR_64 = interp1(log10(BER_64), SNR_dB, log10(target_BER), 'pchip');
+
+fprintf('16-QAM: SNR для 1e-3 = %.2f дБ, для 1e-4 = %.2f дБ\n', SNR_16(1), SNR_16(2));
+fprintf('64-QAM: SNR для 1e-3 = %.2f дБ, для 1e-4 = %.2f дБ\n', SNR_64(1), SNR_64(2));
