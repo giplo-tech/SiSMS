@@ -1,0 +1,33 @@
+%% Оценка режима передачи по измеренному SINR
+clear all; clc;
+
+% Измеренные значения SINR
+SINR_good = 18;  % дБ - хороший канал
+SINR_bad = 6;    % дБ - плохой канал
+
+% Требуемый SNR для BER=1e-4 (с учетом кодирования)
+SNR_16_target = 11.2;  % 16-QAM с кодом
+SNR_64_target = 16.1;  % 64-QAM с кодом
+
+% Оценка для хорошего канала
+fprintf('ХОРОШИЙ КАНАЛ (SINR = %d дБ):\n', SINR_good);
+if SINR_good >= SNR_64_target
+    fprintf('  Можно использовать 64-QAM (SINR выше требуемого)\n');
+    fprintf('  Можно использовать 16-QAM (SINR выше требуемого)\n');
+    fprintf('  Рекомендация: 64-QAM для максимальной скорости\n');
+elseif SINR_good >= SNR_16_target
+    fprintf('  Можно использовать только 16-QAM\n');
+    fprintf('  64-QAM не рекомендуется (недостаточно SINR)\n');
+else
+    fprintf('  Канал слишком плохой, требуется снижение скорости\n');
+end
+
+% Оценка для плохого канала
+fprintf('\nПЛОХОЙ КАНАЛ (SINR = %d дБ):\n', SINR_bad);
+if SINR_bad >= SNR_64_target
+    fprintf('  Можно использовать 64-QAM\n');
+elseif SINR_bad >= SNR_16_target
+    fprintf('  Можно использовать только 16-QAM\n');
+else
+    fprintf('  Канал слишком плохой, требуется снижение скорости\n');
+end
